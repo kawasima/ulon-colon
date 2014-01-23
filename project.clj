@@ -1,4 +1,4 @@
-(defproject ulon-colon "0.1.0-SNAPSHOT"
+(defproject net.unit8/ulon-colon "0.1.0-SNAPSHOT"
   :description "Message transfer system without a queue."
   :url "https://github.com/kawasima/ulon-colon"
   :license {:name "Eclipse Public License"

@@ -32,13 +32,12 @@
                                    (logging/info (str "Added transactions: " (msg :id) @transactions))
                                    (enqueue ch (msg :payload)))))
 
-(defn start-producer [port]
-  (let [port (Integer. (or port 5000))]
-    (receive-all produce-channel
-      (fn [msg] (enqueue broadcast-channel msg)))
-    (start-http-server handler
-      {:port port
-       :websocket true})))
+(defn start-producer [& {:keys [port] :or {port 5629}}]
+  (receive-all produce-channel
+               (fn [msg] (enqueue broadcast-channel msg)))
+  (start-http-server handler
+                     {:port port
+                      :websocket true}))
 
 (defn produce [msg]
   (let [message-id (java.util.UUID/randomUUID)
