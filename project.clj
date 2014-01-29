@@ -6,4 +6,13 @@
   :dependencies [[org.clojure/clojure "1.5.1"]
                  [org.clojure/tools.logging "0.2.6"]
                  [aleph "0.3.0"]
-                 [org.clojure/data.fressian "0.2.0"]])
+                 [org.clojure/data.fressian "0.2.0"]
+                 [org.clojure/clojurescript "0.0-2138"]]
+  :plugins [[lein-cljsbuild "1.0.1"]]
+  :source-paths ["src/clj"]
+  :cljsbuild {:dev
+              {:source-paths ["src/cljs"]
+               :jar true
+               :compiler {:output-to "resources/public/js/main-debug.js"
+                          :optimizations :whitespace
+                          :pretty-print true}}})
