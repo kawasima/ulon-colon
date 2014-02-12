@@ -6,7 +6,7 @@
 (document-ready
  (fn []
    (let [consumer (make-consumer "ws://localhost:5629")
-         canvas   ($ "#image-1")
+         canvas   (first ($ "#image-1"))
          ctx      (. canvas getContext "2d")
          img      (js/Image.)]
      (set! (.-onload img)
