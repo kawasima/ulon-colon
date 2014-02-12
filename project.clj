@@ -7,17 +7,16 @@
                  [org.clojure/tools.logging "0.2.6"]
                  [aleph "0.3.0"]
                  [org.clojure/data.fressian "0.2.0"]
-                 [org.clojure/clojurescript "0.0-2138"]
-                 [org.clojure/core.async "0.1.267.0-0d7780-alpha"]]
+                 [org.clojure/clojurescript "0.0-2156" :scope "provided"]
+                 [org.clojure/core.async "0.1.267.0-0d7780-alpha"]
+                 [net.unit8/fressian-cljs "0.1.0"]]
   :plugins [[lein-cljsbuild "1.0.2"]]
-  :source-paths ["src/clj"]
-  :hooks [leiningen.cljsbuild]
+  :source-paths ["src/clj" "src/cljs"]
   :cljsbuild
-  {:crossover-jar true
-   :builds
+  {:builds
    {:dev
     {:source-paths ["src/cljs"]
-     :jar true
+     :jar false
      :compiler {:output-to "resources/public/js/main-debug.js"
                 :optimizations :whitespace
                 :pretty-print true}}}})

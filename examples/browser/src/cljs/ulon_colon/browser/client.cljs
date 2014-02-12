@@ -1,5 +1,5 @@
 (ns ulon-colon.browser.client
-  (:use [ulon-colon.consumer :only [make-consumer consume comsume-sync]]
+  (:use [ulon-colon.consumer :only [make-consumer consume consume-sync]]
         [goog.crypt.base64 :only [encodeByteArray]]
         [jayq.core :only [$ document-ready]]))
 

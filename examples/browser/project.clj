@@ -11,5 +11,7 @@
   :cljsbuild
   { :builds [{:source-paths ["src/cljs"]
               :compiler {:optimizations :advanced
-                         :output-to "resources/public/js/example.js"}}]}
+                         :output-to "resources/public/js/example.js"}
+              :incremental false}
+              ]}
   :ring {:handler ulon-colon.browser.core/app})

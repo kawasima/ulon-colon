@@ -1,6 +1,6 @@
 ;; ulon-colon consumer Clojure Script
 (ns ulon-colon.consumer
-  (:require-macros [cljs.core.async.macros :refer [go go-loop]])
+  (:require-macros [cljs.core.async.macros :refer [go]])
   (:require [fressian-cljs.core :as fress]
             [cljs.core.async :refer [chan <! put!]]))
 
@@ -8,7 +8,7 @@
 
 (defn- reconnect [consumer]
   (let [client (js/WebSocket. (@consumer :producer-url))]
-    (logging/info (str "Reconnect to producer" (@consumer :producer-url)))))
+    (.log js/console (str "Reconnect to producer" (@consumer :producer-url)))))
 
 (defn make-consumer [producer-url]
   (let [ws (js/WebSocket. producer-url)
@@ -33,9 +33,10 @@
        (.send consumer (fress/write @res))))))
 
 (defn consume [consumer consume-fn & {:keys [on-fail]}]
-  (go-loop
-   (let [msg (<! receive)]
-     (consume* consumer consume-fn msg))))
+  (go
+    (while true
+      (let [msg (<! receive)]
+        (consume* consumer consume-fn msg)))))
 
 (defn consume-sync
   "Consume message in synchronized mode. If message "

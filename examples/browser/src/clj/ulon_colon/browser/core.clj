@@ -9,6 +9,7 @@
   (html5
    [:head
     [:meta {:charset "UTF-8"}]
+    [:script {:src "/js/jquery-1.11.0.min.js"}]
     [:script {:src "/js/example.js"}]]
    [:body
     [:canvas {:id "image-1" :width "320" :height "240"}]]))
