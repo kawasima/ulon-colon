@@ -48,5 +48,3 @@
                                :payload (->> {:id message-id :body msg}
                                           fress/write)})
     response-queue))
-
-(defn -main [& args])

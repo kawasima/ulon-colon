@@ -30,7 +30,7 @@
         (swap! res assoc :status :fail, :cause (.getMessage ex))
         (throw ex))
       (finally
-       (.send consumer (fress/write @res))))))
+       (.send (:channel @consumer) (fress/write @res))))))
 
 (defn consume [consumer consume-fn & {:keys [on-fail]}]
   (go

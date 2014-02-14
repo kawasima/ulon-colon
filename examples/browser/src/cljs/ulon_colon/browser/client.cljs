@@ -10,7 +10,7 @@
          ctx      (. canvas getContext "2d")
          img      (js/Image.)]
      (set! (.-onload img)
-           #((. ctx drawImage img 0 0)))
+       #(. ctx drawImage img 0 0 640 480))
      (consume consumer
               (fn [msg]
                 (set! (. img -src) (str "data:image/png;base64,"
