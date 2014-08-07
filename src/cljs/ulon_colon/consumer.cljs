@@ -15,7 +15,7 @@
         consumer (atom {:channel ws :producer-url producer-url})]
     (doto ws
       (aset "binaryType" "arraybuffer")
-      (aset "onclose" #(reconnect consumer))
+      (aset "onclose" (fn [event] (js/setTimeout #(reconnect consumer) 5000)))
       (aset "onmessage"
             (fn [m]
               (when-let [data (fress/read (.-data m))]
