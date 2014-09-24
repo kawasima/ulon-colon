@@ -15,19 +15,16 @@
         msg-id (msg :id)]
     (if (= (msg :status) :ack)
       (do
-        (logging/info (str "Receive Ack from " channel))
-        (logging/info (str "Transaction count: "  (count (get-in @transactions [msg-id :consumers]))))
+        (logging/debug (str "Receive Ack from " channel))
         (swap! transactions update-in [msg-id :consumers] #(remove (partial = %2) %1) channel)
         (when (empty? (get-in @transactions [msg-id :consumers]))
-          (logging/info (str "Transaction commit: " msg-id))
+          (logging/debug (str "Transaction commit: " msg-id))
           (put! (get-in @transactions [msg-id :producer]) :commit)
           (swap! transactions dissoc msg-id))))))
-
 
 (defn start-producer [& {:keys [port] :or {port 5629}}]
   (go-loop []
     (let [msg (<! produce-channel)]
-      (logging/info "produce -> broadcast")
       (put! broadcast-channel msg)
       (recur)))
 
@@ -38,9 +35,7 @@
           (onConnect [ctx]
             (go-loop []
               (let [msg (<! broadcast-channel)]
-                (logging/info "broadcast ->")
                 (swap! transactions update-in [(msg :id) :consumers] conj ctx)
-                #_(logging/info (str "Added transactions: " (msg :id) @transactions))
                 (. ctx writeAndFlush (BinaryWebSocketFrame. (Unpooled/copiedBuffer (msg :payload))))
                 (when (.. ctx channel isActive)
                   (recur)))))
@@ -55,7 +50,7 @@
         response-queue (chan)]
     (swap! transactions assoc message-id
            {:producer response-queue :consumers []})
-    (logging/info (str "produce " msg))
+    (logging/debug (str "produce " msg))
     (put! produce-channel {:id message-id
                            :payload (->> {:id message-id :body msg}
                                       fress/write)})

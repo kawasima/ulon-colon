@@ -20,7 +20,7 @@ public abstract class WebSocketClientHandler extends SimpleChannelInboundHandler
     public WebSocketClientHandler(String url) {
         URI uri = URI.create(url);
         handshaker = WebSocketClientHandshakerFactory.newHandshaker(
-                uri, WebSocketVersion.V13, null, false, new DefaultHttpHeaders());
+                uri, WebSocketVersion.V13, null, false, new DefaultHttpHeaders(), 65535 * 256);
     }
 
     public ChannelFuture handshakeFuture() {
