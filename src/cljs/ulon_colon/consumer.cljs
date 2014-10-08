@@ -1,6 +1,6 @@
 ;; ulon-colon consumer Clojure Script
 (ns ulon-colon.consumer
-  (:require-macros [cljs.core.async.macros :refer [go]])
+  (:require-macros [cljs.core.async.macros :refer [go go-loop]])
   (:require [fressian-cljs.core :as fress]
             [cljs.core.async :refer [chan <! put!]]))
 
@@ -33,10 +33,10 @@
        (.send (:channel @consumer) (fress/write @res))))))
 
 (defn consume [consumer consume-fn & {:keys [on-fail]}]
-  (go
-    (while true
-      (let [msg (<! receive)]
-        (consume* consumer consume-fn msg)))))
+  (go-loop []
+    (let [msg (<! receive)]
+      (consume* consumer consume-fn msg)
+      (recur))))
 
 (defn consume-sync
   "Consume message in synchronized mode. If message "
