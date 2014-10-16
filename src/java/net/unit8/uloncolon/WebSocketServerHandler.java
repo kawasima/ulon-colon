@@ -132,6 +132,6 @@ public abstract class WebSocketServerHandler extends SimpleChannelInboundHandler
     }
 
     public abstract void onConnect(ChannelHandlerContext ctx);
-    public abstract void onDisconnect(ChannelHandlerContext channel);
+    public abstract void onDisconnect(ChannelHandlerContext ctx);
     public abstract void onBinaryMessage(ChannelHandlerContext ctx, byte[] message);
 }

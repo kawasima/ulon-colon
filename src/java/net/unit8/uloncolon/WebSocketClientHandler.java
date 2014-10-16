@@ -12,10 +12,11 @@ import java.net.URI;
 /**
  * @author kawasima
  */
-public abstract class WebSocketClientHandler extends SimpleChannelInboundHandler<Object> {
-
+public class WebSocketClientHandler extends SimpleChannelInboundHandler<Object> {
     private WebSocketClientHandshaker handshaker;
     private ChannelPromise handshakeFuture;
+    private DisconnectListener disconnectListener;
+    private WebSocketMessageListener messageListener;
 
     public WebSocketClientHandler(String url) {
         URI uri = URI.create(url);
@@ -37,9 +38,14 @@ public abstract class WebSocketClientHandler extends SimpleChannelInboundHandler
         handshaker.handshake(ctx.channel());
     }
 
+    /**
+     * reconnect to server.
+     *
+     * @param ctx
+     */
     @Override
     public void channelInactive(ChannelHandlerContext ctx) {
-        System.out.println("WebSocket Client disconnected!");
+        disconnectListener.onDisconnect();
     }
 
     @Override
@@ -47,7 +53,7 @@ public abstract class WebSocketClientHandler extends SimpleChannelInboundHandler
         Channel ch = ctx.channel();
         if (!handshaker.isHandshakeComplete()) {
             handshaker.finishHandshake(ch, (FullHttpResponse) msg);
-            System.out.println("WebSocket Client connected!");
+
             handshakeFuture.setSuccess();
             return;
         }
@@ -64,11 +70,10 @@ public abstract class WebSocketClientHandler extends SimpleChannelInboundHandler
             ByteBuf rawMsg = frame.content();
             byte[] buf = new byte[rawMsg.readableBytes()];
             rawMsg.readBytes(buf);
-            onBinaryMessage(ctx, buf);
+            messageListener.onBinaryMessage(ctx, buf);
         } else if (frame instanceof PongWebSocketFrame) {
             System.out.println("WebSocket Client received pong");
         } else if (frame instanceof CloseWebSocketFrame) {
-            System.out.println("WebSocket Client received closing");
             ch.close();
         } else {
             throw new IllegalStateException("Unknown frame type: " + frame.getClass());
@@ -84,5 +89,11 @@ public abstract class WebSocketClientHandler extends SimpleChannelInboundHandler
         ctx.close();
     }
 
-    public abstract void onBinaryMessage(ChannelHandlerContext ctx, byte[] message);
+    public void setDisconnectListener(DisconnectListener listener) {
+        this.disconnectListener = listener;
+    }
+
+    public void setMessageListener(WebSocketMessageListener listener) {
+        this.messageListener = listener;
+    }
 }

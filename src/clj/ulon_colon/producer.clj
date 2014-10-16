@@ -1,13 +1,13 @@
 (ns ulon-colon.producer
   (:require [clojure.tools.logging :as logging]
-            [clojure.core.async :as async :refer [chan go-loop <! put!]]
+            [clojure.core.async :as async :refer [chan go-loop <! put! mult tap untap]]
             [clojure.data.fressian :as fress])
   (:import  [net.unit8.uloncolon WebSocketServer WebSocketServerHandler WebSocketServerHandlerFactory]
             [io.netty.buffer Unpooled]
             [io.netty.handler.codec.http.websocketx BinaryWebSocketFrame]))
 
-(def broadcast-channel (chan))
 (def produce-channel (chan))
+(def broadcast-channel (mult produce-channel))
 (def transactions (atom {}))
 
 (defn- response-handler [channel msg-raw]
@@ -23,26 +23,24 @@
           (swap! transactions dissoc msg-id))))))
 
 (defn start-producer [& {:keys [port] :or {port 5629}}]
-  (go-loop []
-    (let [msg (<! produce-channel)]
-      (put! broadcast-channel msg)
-      (recur)))
-
   (WebSocketServer.
     (proxy [WebSocketServerHandlerFactory] []
       (create []
-        (proxy [WebSocketServerHandler] []
-          (onConnect [ctx]
-            (go-loop []
-              (let [msg (<! broadcast-channel)]
-                (swap! transactions update-in [(msg :id) :consumers] conj ctx)
-                (. ctx writeAndFlush (BinaryWebSocketFrame. (Unpooled/copiedBuffer (msg :payload))))
-                (when (.. ctx channel isActive)
-                  (recur)))))
-          (onBinaryMessage [channel message]
-            (response-handler channel message))
-          (onDisconnect [channel]
-            ))))
+        (let [client-channel (chan)]
+          (proxy [WebSocketServerHandler] []
+            (onConnect [ctx]
+              (tap broadcast-channel client-channel)
+              (go-loop []
+                (let [msg (<! client-channel)]
+                  (swap! transactions update-in [(msg :id) :consumers] conj ctx)
+                  (. ctx writeAndFlush (BinaryWebSocketFrame. (Unpooled/copiedBuffer (msg :payload))))
+                  (if (.. ctx channel isActive)
+                    (recur)
+                    (untap broadcast-channel client-channel)))))
+            (onBinaryMessage [ctx message]
+              (response-handler ctx message))
+            (onDisconnect [ctx]
+              (untap broadcast-channel client-channel))))))
     port))
   
 (defn produce [msg]
@@ -55,3 +53,6 @@
                            :payload (->> {:id message-id :body msg}
                                       fress/write)})
     response-queue))
+
+(defn stop-producer [producer]
+  (.close producer))
