@@ -45,6 +45,6 @@
    (let [msg (<! receive)]
      (consume* consumer consume-fn msg))))
 
-(defn stop-consume! [consumer]
+(defn stop-consume [consumer]
   (let [ws (@consumer :channel)]
     (set! (.-onmessage ws) nil)))

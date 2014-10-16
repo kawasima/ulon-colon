@@ -1,6 +1,6 @@
 import io.netty.channel.ChannelHandlerContext;
 import net.unit8.uloncolon.WebSocketClient;
-import net.unit8.uloncolon.WebSocketClientHandler;
+import net.unit8.uloncolon.WebSocketMessageListener;
 import org.junit.Test;
 
 /**
@@ -9,10 +9,10 @@ import org.junit.Test;
 public class WebSocketClientTest {
     @Test
     public void test() throws InterruptedException {
-        WebSocketClient client = new WebSocketClient(new WebSocketClientHandler("ws://localhost:5629") {
+        WebSocketClient client = new WebSocketClient(new WebSocketMessageListener() {
             @Override
             public void onBinaryMessage(ChannelHandlerContext ctx, byte[] message) {
-                System.out.println(message);
+                System.out.println(new String(message));
             }
         });
         client.connect("ws://localhost:5629");

@@ -2,12 +2,12 @@
   (:require [clojure.tools.logging :as logging]
             [clojure.core.async :as async :refer [chan go go-loop <! <!! put!]]
             [clojure.data.fressian :as fress])
-  (:import  [net.unit8.uloncolon WebSocketClient WebSocketClientHandler]))
+  (:import  [net.unit8.uloncolon WebSocketClient WebSocketMessageListener]))
 
 (defn make-consumer [producer-url]
   (let [ch (chan)
         client (WebSocketClient.
-                 (proxy [WebSocketClientHandler] [producer-url]
+                 (proxy [WebSocketMessageListener] []
                    (onBinaryMessage [_ message]
                      (put! ch message))))]
     (.connect client producer-url)
@@ -40,6 +40,6 @@
     (consume* (:client consumer) consume-fn msg-raw)))
       
 
-(defn stop-consume! [consumer]
+(defn stop-consume [consumer]
   (.close (:client consumer)))
 
