@@ -73,8 +73,7 @@ public class WebSocketServer {
 
     public void close() {
         try {
-            channel.closeFuture().sync();
-        } catch (InterruptedException e) {
+            channel.close();
         } finally {
             bossGroup.shutdownGracefully();
             workerGroup.shutdownGracefully();
